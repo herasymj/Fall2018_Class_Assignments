@@ -36,7 +36,7 @@ namespace Assignment1
 
             //quicksort the recursive way
             System.Console.WriteLine("Sorting recursively...");
-            recursiveQuickSort(numList, numList[0], numList[99]);
+            recursiveQuickSort(numList, 0, 99);
 
             //print newly sorted list
             System.Console.WriteLine("Recursively sorted list: ");
@@ -45,6 +45,7 @@ namespace Assignment1
             //reset list to another 100 random numbers
             System.Console.WriteLine("Randomizing list with another 100 random integers...");
             System.Console.WriteLine("New list: ");
+            numList = resetList();
             print(numList);
 
             //quicksort iteratively
@@ -80,8 +81,12 @@ namespace Assignment1
         public static List<int> resetList()
         {
             var newList = new List<int>();
+            var random = new Random();
 
-
+            for (int i = 0; i < 100; i++)
+            {
+                newList.Add(random.Next(0, 1000));
+            }
 
             return newList;
         }
@@ -95,41 +100,48 @@ namespace Assignment1
          *      list: an array of unsorted integers
          * Returns: returns an integer array of sorted integers
          * 
-         * Algorithm adapted from https://www.geeksforgeeks.org/quick-sort/
+         * Algorithm adapted from http://snipd.net/quicksort-in-c 
          */
-        public static List<int> recursiveQuickSort(List<int> list, int lowVal, int highVal)
+        public static void recursiveQuickSort(List<int> list, int lowVal, int highVal)
         {
-            if (lowVal < highVal)
-            {
-                int partitionIndex = recursiveHelper(list, lowVal, highVal);
+            int left = lowVal;
+            int right = highVal;
+            int pivot = list[(lowVal + highVal) / 2];
 
-                recursiveQuickSort(list, lowVal, partitionIndex - 1);
-                recursiveQuickSort(list, partitionIndex + 1, highVal);
-            }
-
-            return list;
-        }
-        public static int recursiveHelper(List<int> list, int lowVal, int highVal)
-        {
-            int pivotVal = list[highVal];
- 
-            int index = (lowVal - 1);
-            for (int i = lowVal; i < highVal; i++)
+            while (left <= right)
             {
-                if (list[i] <= pivotVal)
+                while (list[left].CompareTo(pivot) < 0)
                 {
-                    i++;
-                    int temp = list[index];
-                    list[index] = list[i];
-                    list[i] = temp;
+                    left++;
+                }
+
+                while (list[right].CompareTo(pivot) > 0)
+                {
+                    right--;
+                }
+
+                if (left <= right)
+                {
+                    int temp = list[left];
+                    list[left] = list[right];
+                    list[right] = temp;
+
+                    left++;
+                    right--;
                 }
             }
-            int temp1 = list[index + 1];
-            list[index + 1] = list[highVal];
-            list[highVal] = temp1;
 
-            return index + 1; 
+            if (lowVal < right)
+            {
+                recursiveQuickSort(list, lowVal, right);
+            }
+
+            if (left < highVal)
+            {
+                recursiveQuickSort(list, left, highVal);
+            }
         }
+
 
         /*
          * iterativeQuickSort
@@ -140,11 +152,54 @@ namespace Assignment1
          *      list: an array of unsorted integers
          * Returns: returns an integer array of sorted integers
          * 
-         * Adapted using algorithm from https://www.geeksforgeeks.org/iterative-quick-sort/
+         * Algortihm adapted from https://javarevisited.blogspot.com/2016/09/iterative-quicksort-example-in-java-without-recursion.html
          */
-        public static List<int> iterativeQuickSort(List<int> list)
+        public static void iterativeQuickSort(List<int> list)
         {
+            Stack<int> sortStack = new Stack<int>();
+            int right = 99;
+            int left = 0;
+            sortStack.Push(left);
+            sortStack.Push(right);
 
+            while (sortStack.Count != 0)
+            {
+                right = sortStack.Pop();
+                left = sortStack.Pop();
+
+                //partition
+                int partition = 0;
+                int temp = 0;
+                int index = left - 1;
+                int pivot = list[right];
+                for (int i = left; i <= right - 1; i++)
+                {
+                    if (list[i] <= pivot)
+                    {
+                        index++;
+                        temp = list[index];
+                        list[index] = list[i];
+                        list[i] = temp;
+                    }
+                }
+
+                //swap
+                partition = index + 1;
+                temp = list[partition];
+                list[partition] = list[right];
+                list[right] = temp;
+
+                if (partition - 1 > left)
+                {
+                    sortStack.Push(left);
+                    sortStack.Push(partition - 1);
+                }
+                if (partition + 1 < right)
+                {
+                    sortStack.Push(partition + 1);
+                    sortStack.Push(right);
+                }
+            }
         }
     }
 }
